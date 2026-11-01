@@ -1,0 +1,8 @@
+strands-agents>=1.0
+streamlit>=1.40
+pandas
+pydantic>=2
+pypdf
+python-dotenv
+# Optional, only for MODEL_PROVIDER=ollama:
+# strands-agents[ollama]
