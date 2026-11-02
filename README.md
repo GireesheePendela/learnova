@@ -17,6 +17,14 @@ the student or teacher uploads, not only the built-in math and science samples.
 AWS services: **Amazon Bedrock** (the three agents' models) and **Amazon Polly** (read-aloud).
 Students never need an account or pay anything; whoever hosts the app pays for its AWS usage.
 
+## Screenshots
+
+| Start | Learn (Hindi) |
+|---|---|
+| ![Start page](docs/screenshots/start-page.png) | ![Learn page in Hindi](docs/screenshots/learn-hindi.png) |
+| **Quiz A (Arabic, right-to-left)** | **Progress** |
+| ![Arabic quiz](docs/screenshots/quiz-arabic.png) | ![Progress page](docs/screenshots/progress.png) |
+
 ## How it works
 
 ```
