@@ -58,7 +58,9 @@ cd learnova
 pip install -r requirements.txt
 cp .env.example .env        # set BEDROCK_MODEL_ID to a model the sandbox can use
 python -m unittest discover tests
-python cli.py --language Hindi     # terminal version; checks Bedrock access end to end
+python scripts/check_model.py          # ~10s: confirms Bedrock access and the model id
+python scripts/smoke_content.py Hindi  # Content Agent only: concepts + parallel quizzes
+python scripts/smoke_flow.py Hindi     # whole session with a simulated student
 streamlit run app.py --server.port 8501 --server.headless true
 ```
 
