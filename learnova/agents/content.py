@@ -108,8 +108,3 @@ def write_follow_up(analysis: LessonAnalysis, lesson_text: str, language: str,
     follow_up = _generate(FOLLOW_UP_PROMPT, FollowUpQuiz, prompt,
                           lambda f: check_quizzes(with_quiz_b(f)), max_attempts)
     return analysis.model_copy(update={"quiz_b": shuffle_options(follow_up.quiz_b)})
-
-
-def analyze_lesson(lesson_text: str, language: str, max_attempts: int = 2) -> LessonAnalysis:
-    """Both steps in one go: concepts, Quiz A and Quiz B."""
-    return write_follow_up(draft_diagnostic(lesson_text, language, max_attempts), lesson_text, language, max_attempts)
