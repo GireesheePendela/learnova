@@ -116,7 +116,8 @@ header[data-testid="stHeader"] { background: transparent; }
 .lv-bar { height: 6px; border-radius: 999px; background: rgba(181, 210, 230, 0.6); overflow: hidden; margin: 1.3rem auto 0; max-width: 360px; }
 .lv-bar span { display: block; height: 100%; width: 40%; border-radius: 999px; background: var(--grad); animation: lv-slide 1.6s ease-in-out infinite; }
 /* While loading, hide the previous page's leftovers that Streamlit shows faded out */
-.stApp:has(.lv-loading) [data-testid="stMain"] [data-stale="true"] { display: none; }
+.stApp:has(.lv-loading) [data-testid="stMain"] [data-stale="true"],
+[data-testid="stElementContainer"]:has(.lv-loading) ~ * { display: none; }
 @keyframes lv-spin { to { transform: rotate(360deg); } }
 @keyframes lv-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 

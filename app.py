@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 
 from learnova import session
 from learnova.config import db_path
-from learnova.lesson import LANGUAGES, RTL_LANGUAGES, sample_lesson, text_from_upload
+from learnova.lesson import LANGUAGES, RTL_LANGUAGES, SAMPLES, sample_lesson, text_from_upload
 from learnova.store import Store
 
 st.set_page_config(page_title="Learnova", page_icon="📘", layout="wide")
@@ -168,13 +168,15 @@ if state.stage == "setup":
     with left:
         with st.container(key="card_start"):
             st.markdown("#### Start a session")
-            name = st.text_input("Your first name", value="Student")
+            name = st.text_input("Nickname (optional)", placeholder="e.g. Asha",
+                                 help="Only shown on your progress page and report. You can leave it empty.")
             language = st.selectbox("Language you learn best in", LANGUAGES)
-            source = st.radio("Lesson", ["Use the sample fractions lesson", "Upload my own lesson (.txt, .md, .pdf)"])
+            upload_label = "Upload my own lesson (.txt, .md, .pdf)"
+            source = st.radio("Lesson", [f"Sample: {s}" for s in SAMPLES] + [upload_label])
             lesson_text = None
-            if source.startswith("Use"):
-                lesson_text = sample_lesson()
-                with st.expander("Preview sample lesson"):
+            if source != upload_label:
+                lesson_text = sample_lesson(source.removeprefix("Sample: "))
+                with st.expander("Preview this lesson"):
                     st.markdown(lesson_text)
             else:
                 upload = st.file_uploader("Lesson file", type=["txt", "md", "pdf"])
@@ -186,7 +188,7 @@ if state.stage == "setup":
             if st.button("Start diagnostic quiz", type="primary", disabled=not lesson_text, width="stretch"):
                 for k in [k for k in state.keys() if k != "stage"]:
                     del state[k]
-                state.pending = {"name": name, "language": language, "lesson_text": lesson_text}
+                state.pending = {"name": name.strip() or "Student", "language": language, "lesson_text": lesson_text}
                 go("preparing")
     with right:
         st.markdown("#### How it works")

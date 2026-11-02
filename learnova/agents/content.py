@@ -25,7 +25,8 @@ QUESTION_RULES = """Rules for every question:
 - Exactly 4 options, exactly one correct, answer_index pointing to it. Vary which position
   holds the correct option.
 - Wrong options should reflect real misconceptions (for fractions, e.g. adding denominators).
-- Solve each question yourself before writing answer_index, and put the solution in explanation.
+- Solve each question yourself before writing answer_index, and put a short solution (one or two
+  sentences) in explanation.
   Never refer to options by letter or position ("option b"); options are shuffled afterwards.
 - Only test what the lesson teaches.
 - Write questions, options, explanations and concept names in the student's language and its

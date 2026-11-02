@@ -94,7 +94,7 @@ learnova/agents/           content.py, assessment.py, tutor.py, common.py
 learnova/grading.py        Grading, mastery, quiz comparability checks (no LLM)
 learnova/store.py          SQLite: lessons, attempts, tutoring decisions
 learnova/session.py        Workflow shared by both UIs
-data/sample_fractions.md   Built-in sample lesson
+data/                      Built-in sample lessons (fractions, photosynthesis)
 tests/                     Unit tests for the deterministic parts
 ```
 

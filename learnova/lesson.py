@@ -3,7 +3,12 @@
 import io
 from pathlib import Path
 
-SAMPLE_LESSON = Path(__file__).resolve().parent.parent / "data" / "sample_fractions.md"
+DATA = Path(__file__).resolve().parent.parent / "data"
+# Built-in lessons the student can pick without uploading anything.
+SAMPLES = {
+    "Fractions (math)": DATA / "sample_fractions.md",
+    "Photosynthesis (science)": DATA / "sample_photosynthesis.md",
+}
 MAX_CHARS = 20_000
 
 LANGUAGES = [
@@ -14,8 +19,8 @@ LANGUAGES = [
 RTL_LANGUAGES = {"Arabic"}
 
 
-def sample_lesson() -> str:
-    return SAMPLE_LESSON.read_text(encoding="utf-8")
+def sample_lesson(name: str = "Fractions (math)") -> str:
+    return SAMPLES[name].read_text(encoding="utf-8")
 
 
 def text_from_upload(filename: str, data: bytes) -> str:

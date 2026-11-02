@@ -1,6 +1,7 @@
 """Smoke test: run the Content Agent on the sample lesson against the configured model.
 
     python scripts/smoke_content.py Hindi
+    python scripts/smoke_content.py Hindi photosynthesis   # the science sample
 """
 
 import faulthandler
@@ -20,15 +21,20 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 from learnova.agents.content import draft_diagnostic, write_follow_up  # noqa: E402
 from learnova.grading import check_quizzes  # noqa: E402
-from learnova.lesson import sample_lesson  # noqa: E402
+from learnova.lesson import SAMPLES, sample_lesson  # noqa: E402
 
 language = sys.argv[1] if len(sys.argv) > 1 else "Hindi"
+wanted = sys.argv[2].lower() if len(sys.argv) > 2 else "fractions"
+sample = next((s for s in SAMPLES if s.lower().startswith(wanted)), None)
+if sample is None:
+    raise SystemExit(f"Unknown sample '{wanted}'. Choose from: {list(SAMPLES)}")
+lesson = sample_lesson(sample)
 start = time.time()
 try:
-    analysis = draft_diagnostic(sample_lesson(), language)
+    analysis = draft_diagnostic(lesson, language)
     print(f"concepts + Quiz A in {time.time() - start:.0f}s (what the student waits for)")
     mid = time.time()
-    analysis = write_follow_up(analysis, sample_lesson(), language)
+    analysis = write_follow_up(analysis, lesson, language)
     print(f"Quiz B in {time.time() - mid:.0f}s (written in the background in the app)")
 except Exception as e:
     print(f"FAILED after {time.time() - start:.0f}s: {type(e).__name__}: {e}")
