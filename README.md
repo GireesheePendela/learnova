@@ -86,6 +86,8 @@ Small local models are slower and less reliable at tool calling and non-English 
 
 ```
 app.py                     Streamlit UI
+assets/style.css           Look and feel: three colours, gradient, right-to-left Arabic
+.streamlit/config.toml     Streamlit theme colours
 cli.py                     Terminal UI
 learnova/config.py         Model provider switch
 learnova/agents/           content.py, assessment.py, tutor.py, common.py

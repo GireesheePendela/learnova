@@ -10,6 +10,8 @@ LANGUAGES = [
     "Hindi", "Spanish", "Bengali", "Arabic", "Portuguese",
     "Swahili", "Vietnamese", "Chinese (Simplified)", "Tagalog", "English",
 ]
+# Languages written right-to-left; the app lays out lesson content from the right for these.
+RTL_LANGUAGES = {"Arabic"}
 
 
 def sample_lesson() -> str:

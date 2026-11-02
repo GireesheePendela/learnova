@@ -1,0 +1,12 @@
+# Learnova's three colours: ink (background), violet and aqua (accents and the gradient).
+# Lighter ink shades and white text are only used for contrast.
+[theme]
+base = "dark"
+primaryColor = "#7C5CFF"
+backgroundColor = "#0D0F2B"
+secondaryBackgroundColor = "#181A45"
+textColor = "#F3F2FF"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"

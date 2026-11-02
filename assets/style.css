@@ -1,0 +1,158 @@
+/* Learnova look: three colours (ink, violet, aqua) and a violet -> aqua gradient. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600&display=swap');
+
+:root {
+  --ink: #0D0F2B;
+  --violet: #7C5CFF;
+  --aqua: #22D3EE;
+  --grad: linear-gradient(120deg, var(--violet), var(--aqua));
+  --card: rgba(124, 92, 255, 0.08);
+  --line: rgba(124, 92, 255, 0.30);
+  --muted: rgba(243, 242, 255, 0.68);
+}
+
+/* Streamlit's icons use their own font (stIconMaterial), so leave those alone. */
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, .stApp p, .stApp li, .stApp label,
+.stApp input, .stApp textarea, .stApp button, .stApp td, .stApp th, .stApp summary,
+.stApp span:not([data-testid="stIconMaterial"]) {
+  font-family: 'Poppins', 'Noto Sans Arabic', 'Noto Sans', system-ui, sans-serif;
+}
+
+/* Page background: ink with soft violet and aqua glows */
+.stApp {
+  background:
+    radial-gradient(1100px 520px at 0% -8%, rgba(124, 92, 255, 0.28), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, rgba(34, 211, 238, 0.16), transparent 60%),
+    var(--ink);
+}
+header[data-testid="stHeader"] { background: transparent; }
+.stAppDeployButton, #MainMenu, footer { display: none !important; }
+.block-container { max-width: 1040px; padding-top: 1.5rem; padding-bottom: 4rem; }
+
+/* Every paragraph picks its own direction from its first letter, so Arabic reads
+   right-to-left and English left-to-right even when mixed on one page. */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stTable"] td,
+[data-testid="stTable"] th {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/* Top navigation bar */
+.lv-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.7rem 1.1rem; margin-bottom: 1.6rem;
+  border: 1px solid var(--line); border-radius: 16px;
+  background: rgba(13, 15, 43, 0.65); backdrop-filter: blur(8px);
+}
+.lv-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.25rem; }
+.lv-mark {
+  width: 34px; height: 34px; border-radius: 10px; background: var(--grad);
+  display: grid; place-items: center; color: var(--ink); font-weight: 800;
+}
+.lv-steps { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.lv-step {
+  font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted);
+}
+.lv-step.done { color: var(--aqua); border-color: rgba(34, 211, 238, 0.45); }
+.lv-step.now { background: var(--grad); color: var(--ink); border-color: transparent; font-weight: 600; }
+
+/* Hero on the start page */
+.lv-hero { text-align: center; padding: 1.2rem 0 2rem; }
+.lv-eyebrow {
+  display: inline-block; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.3rem 0.8rem; border-radius: 999px; border: 1px solid var(--line); color: var(--aqua);
+}
+.lv-hero h1 {
+  font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.12; margin: 0.9rem 0 0.6rem; font-weight: 700;
+}
+.lv-grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lv-hero p { color: var(--muted); font-size: 1.08rem; max-width: 640px; margin: 0 auto; }
+
+/* Page headings inside a session */
+.lv-title { margin: 0.4rem 0 1rem; }
+.lv-title small { color: var(--aqua); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; }
+.lv-title h2 { font-size: 1.9rem; margin: 0.2rem 0 0.3rem; padding: 0; unicode-bidi: plaintext; }
+.lv-title p { color: var(--muted); margin: 0; }
+
+/* Cards */
+.lv-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 1.1rem 1.2rem;
+  margin-bottom: 0.8rem;
+}
+.lv-card h4 { margin: 0 0 0.3rem; font-size: 1rem; }
+.lv-card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.lv-num {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px;
+  background: var(--grad); color: var(--ink); font-weight: 700; font-size: 0.85rem; margin-right: 0.5rem;
+}
+.lv-reason { border-left: 4px solid var(--aqua); }
+
+/* Streamlit containers styled as cards */
+[data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"] details,
+[class*="st-key-card"] {
+  background: var(--card); border: 1px solid var(--line) !important; border-radius: 18px;
+}
+[data-testid="stForm"], [class*="st-key-card"] { padding: 1.4rem 1.5rem; }
+[data-testid="stMetric"] { padding: 1rem 1.2rem; }
+[data-testid="stMetricValue"] { font-weight: 700; }
+[data-testid="stMetricDelta"] { color: var(--aqua) !important; background: rgba(34, 211, 238, 0.12) !important; }
+[data-testid="stMetricDelta"] svg { fill: var(--aqua) !important; }
+
+/* Quiz questions: one full-width block per question, clear spacing */
+[data-testid="stForm"] [data-testid="stElementContainer"]:has(> [data-testid="stRadio"]) { width: 100%; }
+[data-testid="stForm"] [data-testid="stRadio"] {
+  width: 100%; box-sizing: border-box;
+  padding: 0.9rem 1rem; margin-bottom: 0.7rem; border-radius: 14px;
+  background: rgba(13, 15, 43, 0.55); border: 1px solid rgba(124, 92, 255, 0.18);
+}
+[data-testid="stRadio"] [data-testid="stWidgetLabel"] p { font-size: 1.02rem; font-weight: 500; }
+
+/* Buttons: gradient for the main action, outline for the rest */
+button[kind="primary"], button[kind="primaryFormSubmit"] {
+  background: var(--grad) !important; color: var(--ink) !important; border: 0 !important;
+  border-radius: 999px !important; font-weight: 600 !important; padding: 0.55rem 1.4rem !important;
+  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+}
+button[kind="primary"]:hover, button[kind="primaryFormSubmit"]:hover { filter: brightness(1.08); }
+button[kind="secondary"], button[kind="secondaryFormSubmit"] {
+  border-radius: 999px !important; border: 1px solid var(--line) !important; background: transparent !important;
+}
+
+/* Alerts in the palette: correct answers in aqua, hints and notes in violet */
+[data-testid="stAlertContainer"] {
+  border-radius: 14px; color: #F3F2FF !important;
+  background: rgba(124, 92, 255, 0.14) !important; border: 1px solid var(--line);
+}
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) {
+  background: rgba(34, 211, 238, 0.12) !important; border-color: rgba(34, 211, 238, 0.45);
+}
+[data-testid="stAlertContainer"] p { color: #F3F2FF !important; }
+[data-testid="stAlertContainer"] [data-testid="stIconMaterial"] { color: var(--aqua) !important; }
+[data-testid="stTable"] table { border-radius: 14px; overflow: hidden; }
+
+/* Sidebar */
+[data-testid="stSidebar"] { background: rgba(13, 15, 43, 0.92); border-right: 1px solid var(--line); }
+
+/* Arabic and other right-to-left lessons: lay out lesson content from the right.
+   The .lv-rtl marker is added by app.py only when the student's language is right-to-left. */
+.stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stMarkdownContainer"],
+.stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stRadio"],
+.stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stTable"],
+.stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stAlert"],
+.stApp:has(.lv-rtl) [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+  direction: rtl;
+}
+.stApp:has(.lv-rtl) .lv-nav, .stApp:has(.lv-rtl) .lv-title,
+.stApp:has(.lv-rtl) [data-testid="stMetric"] [data-testid="stMarkdownContainer"] { direction: ltr; }
+
+/* Phones: stack the step bar under the logo */
+@media (max-width: 640px) {
+  .lv-nav { flex-direction: column; align-items: flex-start; }
+  .lv-step { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
+}
