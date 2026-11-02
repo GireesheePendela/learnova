@@ -136,6 +136,24 @@ class SessionTest(unittest.TestCase):
         _, saved = self.store.get_lesson(lesson_id)
         self.assertEqual([x.question for x in saved.quiz_b], ["b1", "b2", "b3", "b4"])
 
+    def test_perfect_latest_practice_means_move_on(self):
+        practice = [PracticeQuestion(question=f"p{i}", options=["1", "2", "3", "4"], answer_index=0,
+                                     hint="h", solution="s") for i in range(3)]
+        # c1 known, c2 missed on Quiz A
+        session.submit_quiz(self.store, self.lesson_id, "quiz_a", {0: 0, 1: 0, 2: 1, 3: 1})
+        session.submit_practice(self.store, self.lesson_id, "c2", practice, {0: 0, 1: 1, 2: 1}, round_no=1)
+        _, a = self.store.get_lesson(self.lesson_id)
+        report = mastery_report(a, self.store.attempts(self.lesson_id))
+        self.assertEqual(weakest_concept(report)["concept_id"], "c2")  # 1/3: still needs work
+
+        session.submit_practice(self.store, self.lesson_id, "c2", practice, {0: 0, 1: 0, 2: 0}, round_no=2)
+        report = mastery_report(a, self.store.attempts(self.lesson_id))
+        c2 = next(r for r in report if r["concept_id"] == "c2")
+        self.assertEqual(c2["last_practice"], 1.0)
+        self.assertFalse(c2["mastered"])  # 4/8 overall
+        self.assertTrue(c2["ready"])      # but 3/3 in the latest round
+        self.assertIsNone(weakest_concept(report))
+
     def test_practice_moves_mastery_and_plan_round_trips(self):
         session.submit_quiz(self.store, self.lesson_id, "quiz_a", {0: 0, 1: 0, 2: 1, 3: 1})
         plan = TutoringPlan(

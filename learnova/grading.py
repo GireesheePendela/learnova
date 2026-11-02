@@ -46,16 +46,33 @@ def pct(correct: int, total: int) -> float | None:
     return None if total == 0 else correct / total
 
 
+def last_practice(attempts) -> dict[str, float]:
+    """Score of each concept's most recent practice round (rounds are numbered by tutoring decision)."""
+    latest: dict[str, int] = {}
+    for a in attempts:
+        if a["phase"] == "practice":
+            latest[a["concept_id"]] = max(latest.get(a["concept_id"], -1), a["round"])
+    rows = [a for a in attempts if a["phase"] == "practice" and a["round"] == latest[a["concept_id"]]]
+    scores = concept_scores(rows, ("practice",))
+    return {cid: c / t for cid, (c, t) in scores.items()}
+
+
 def mastery_report(analysis: LessonAnalysis, attempts) -> list[dict]:
-    """One row per concept: diagnostic, practice, follow-up and current mastery."""
+    """One row per concept: diagnostic, practice, follow-up and current mastery.
+
+    "ready" means mastered, or the latest practice round reached the threshold: the student just
+    showed they can do it, so the tutor should move on even if older mistakes keep the average low.
+    """
     pre = concept_scores(attempts, ("quiz_a",))
     practice = concept_scores(attempts, ("practice",))
     post = concept_scores(attempts, ("quiz_b",))
     # Current mastery uses everything seen so far, so practice moves it too.
     current = concept_scores(attempts, ("quiz_a", "practice", "quiz_b"))
+    recent = last_practice(attempts)
     rows = []
     for c in analysis.concepts:
         cur = pct(*current.get(c.id, (0, 0)))
+        mastered = cur is not None and cur >= MASTERY_THRESHOLD
         rows.append({
             "concept_id": c.id,
             "concept": c.name,
@@ -65,7 +82,9 @@ def mastery_report(analysis: LessonAnalysis, attempts) -> list[dict]:
             "practice": pct(*practice.get(c.id, (0, 0))),
             "quiz_b": pct(*post.get(c.id, (0, 0))),
             "mastery": cur,
-            "mastered": cur is not None and cur >= MASTERY_THRESHOLD,
+            "mastered": mastered,
+            "last_practice": recent.get(c.id),
+            "ready": mastered or recent.get(c.id, 0) >= MASTERY_THRESHOLD,
         })
     return rows
 
@@ -76,8 +95,9 @@ def overall(attempts, phase: str) -> float | None:
 
 
 def weakest_concept(report: list[dict]) -> dict | None:
-    """Deterministic fallback: lowest current mastery, unmastered prerequisites first."""
-    unmastered = [r for r in report if r["mastery"] is not None and not r["mastered"]]
+    """Deterministic fallback: lowest current mastery among concepts not yet ready, their
+    not-ready prerequisites first."""
+    unmastered = [r for r in report if r["mastery"] is not None and not r["ready"]]
     if not unmastered:
         return None
     ids = {r["concept_id"] for r in unmastered}

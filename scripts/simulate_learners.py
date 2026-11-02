@@ -6,7 +6,8 @@ Each learner has a language, a lesson and a fixed set of concepts they already k
 Quiz A from that knowledge, get 1 of 3 practice questions right in their first round and all 3 in
 later rounds. The point is to show how the agents adapt (which concept, why, in which language,
 when they move on); the scores are produced by these rules, so they are NOT learning results.
-Quiz B is not taken for the same reason. Takes about 5-10 minutes; prints a Markdown table at the end.
+Quiz B is not taken for the same reason. Takes about 5-10 minutes: each step is printed as it
+happens, then a summary per learner and a Markdown table at the end.
 """
 
 import sys
@@ -36,13 +37,19 @@ LEARNERS = [
 ]
 
 
+def log(learner: dict, message: str):
+    print(f"[{learner['name']} · {learner['language']}] {message}", flush=True)
+
+
 def run(learner: dict) -> dict:
+    log(learner, f"started: {learner['lesson']}, {learner['profile']}. Content Agent is writing Quiz A…")
     store = Store(":memory:")
     out = {**learner, "rounds": [], "error": None}
     start = time.time()
     try:
         lesson_id = session.start_lesson(store, learner["name"], learner["language"], sample_lesson(learner["lesson"]))
         out["quiz_a_seconds"] = time.time() - start
+        log(learner, f"Quiz A ready in {out['quiz_a_seconds']:.0f}s")
         quiz_b = session.start_quiz_b(store, lesson_id)
         _, analysis = store.get_lesson(lesson_id)
         ids = [c.id for c in analysis.concepts]
@@ -52,13 +59,15 @@ def run(learner: dict) -> dict:
         answers = {i: q.answer_index if q.concept_id in known else (q.answer_index + 1) % 4
                    for i, q in enumerate(analysis.quiz_a)}
         out["quiz_a"] = session.submit_quiz(store, lesson_id, "quiz_a", answers)
+        log(learner, f"answered Quiz A: {out['quiz_a']:.0%}. Assessment Agent is choosing round 1…")
 
         practised: set[str] = set()
         for _ in range(ROUNDS):
             t = time.time()
             d = session.next_step(store, lesson_id)
             if d is None:
-                out["rounds"].append({"concept": "all mastered"})
+                out["rounds"].append({"concept": "all ready → Quiz B"})
+                log(learner, "Assessment Agent: every concept is ready, moving on to Quiz B")
                 break
             first_time = d["concept_id"] not in practised
             practised.add(d["concept_id"])
@@ -68,11 +77,15 @@ def run(learner: dict) -> dict:
             session.submit_practice(store, lesson_id, d["concept_id"], plan.practice, practice, d["decision_id"])
             out["rounds"].append({"concept": d["concept_id"], "source": d["source"], "difficulty": d["difficulty"],
                                   "reason": d["reason"], "practice": f"{right}/3", "seconds": time.time() - t})
+            log(learner, f"round {len(out['rounds'])}: chose {d['concept_id']} via {d['source']} in "
+                         f"{time.time() - t:.0f}s, practice {right}/3")
         t = time.time()
         session.finish_quiz_b(store, lesson_id, quiz_b)
         out["quiz_b_wait"] = time.time() - t
+        log(learner, "done")
     except Exception as e:
         out["error"] = f"{type(e).__name__}: {e}"[:300]
+        log(learner, f"FAILED: {out['error']}")
     return out
 
 
@@ -94,8 +107,12 @@ def report(r: dict):
     print(f"Quiz B extra wait: {r['quiz_b_wait']:.0f}s")
 
 
+print("Running 4 simulated learners, 2 at a time. Each step is printed as it happens.", flush=True)
+print(flush=True)
 with ThreadPoolExecutor(max_workers=2) as pool:
     results = list(pool.map(run, LEARNERS))
+print()
+print("#" * 30 + " Summary " + "#" * 30)
 for r in results:
     report(r)
 

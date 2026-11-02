@@ -17,18 +17,21 @@ Always:
 1. Call get_mastery_report and get_tutoring_history.
 2. Call get_mistakes for the concepts you are considering.
 3. Choose ONE concept using this policy:
-   - A concept is mastered at 0.8 or above. Never choose a mastered concept.
-   - If an unmastered concept has an unmastered prerequisite, choose the prerequisite first.
-   - Otherwise choose the lowest mastery.
-   - If the student was already tutored on a concept and practice is still low, choose it again
-     with a LOWER difficulty and a different focus (another explanation or example).
-   - If practice on the last concept reached 0.8, move on.
+   - A concept is "ready" when it is mastered (mastery 0.8 or above) OR its last_practice (the
+     latest practice round) is 0.8 or above: the student just showed they can do it, even if
+     older mistakes keep the average low. Never choose a ready concept; move on.
+   - If a concept that is not ready has a prerequisite that is not ready, choose the prerequisite first.
+   - Otherwise choose the lowest mastery among concepts that are not ready.
+   - If the student was already tutored on a concept and its last practice is still low, choose it
+     again with a LOWER difficulty (or the same if already 1) and a different focus.
 4. Call assign_tutoring exactly once with a focus that names the specific misconception you saw
-   in the mistakes, and a one-sentence reason a student can read. Write the reason in the
+   in the mistakes, and a one-sentence reason a student can read. Base it on the most recent
+   mistakes (get_mistakes marks them); do not say the student still makes a mistake they have
+   since stopped making. Write the reason in the
    student's language and its usual script, keeping English academic terms in parentheses, and
    address the student informally (e.g. तुम in Hindi, tú in Spanish).
 
-If every assessed concept is mastered, do not call assign_tutoring; reply ALL_MASTERED.
+If every assessed concept is ready, do not call assign_tutoring; reply ALL_MASTERED.
 After acting, reply with one short sentence in English explaining your decision (for the teacher).
 """
 
@@ -41,22 +44,28 @@ def recommend_next(store: Store, lesson_id: int) -> dict | None:
 
     @tool
     def get_mastery_report() -> str:
-        """Per-concept scores for this student as JSON: quiz_a (diagnostic), practice, quiz_b
-        (follow-up), current mastery (all evidence so far) and prerequisite ids.
-        Scores are fractions from 0 to 1, or null if not assessed yet."""
+        """Per-concept scores for this student as JSON: quiz_a (diagnostic), practice (all rounds),
+        last_practice (latest round only), quiz_b (follow-up), mastery (all evidence so far),
+        mastered, ready and prerequisite ids. Scores are fractions from 0 to 1, or null if not
+        assessed yet."""
         return json.dumps(mastery_report(analysis, store.attempts(lesson_id)), ensure_ascii=False)
 
     @tool
     def get_mistakes(concept_id: str) -> str:
-        """Questions the student answered wrongly for one concept, with the option they chose.
+        """Questions the student answered wrongly for one concept, oldest first, with the option
+        they chose and when: "quiz_a", "practice round N" or "quiz_b". "latest": true marks
+        mistakes from the most recent practice round on this concept.
 
         Args:
             concept_id: Concept id such as 'c2'.
         """
+        attempts = [a for a in store.attempts(lesson_id) if a["concept_id"] == concept_id]
+        rounds = sorted({a["round"] for a in attempts if a["phase"] == "practice"})
         wrong = [
-            {"phase": a["phase"], "question": a["question"], "chosen": a["chosen"]}
-            for a in store.attempts(lesson_id)
-            if a["concept_id"] == concept_id and not a["correct"]
+            {"when": f"practice round {rounds.index(a['round']) + 1}" if a["phase"] == "practice" else a["phase"],
+             "latest": a["phase"] == "practice" and a["round"] == rounds[-1],
+             "question": a["question"], "chosen": a["chosen"]}
+            for a in attempts if not a["correct"]
         ]
         return json.dumps(wrong, ensure_ascii=False)
 
