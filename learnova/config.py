@@ -14,10 +14,16 @@ except ImportError:
     pass
 
 
-def get_model():
-    provider = os.getenv("MODEL_PROVIDER", "bedrock").lower()
+def provider() -> str:
+    return os.getenv("MODEL_PROVIDER", "bedrock").lower()
 
-    if provider == "bedrock":
+
+def get_model(output_schema: dict | None = None):
+    """output_schema: JSON schema the reply must follow. Bedrock models handle Strands'
+    structured-output tool well, so it is only used to constrain Ollama models."""
+    name = provider()
+
+    if name == "bedrock":
         from strands.models import BedrockModel
 
         kwargs = {"temperature": float(os.getenv("TEMPERATURE", "0.3"))}
@@ -29,16 +35,21 @@ def get_model():
             kwargs["region_name"] = os.environ["AWS_REGION"]
         return BedrockModel(**kwargs)
 
-    if provider == "ollama":
+    if name == "ollama":
         from strands.models.ollama import OllamaModel
 
         return OllamaModel(
             host=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
             model_id=os.getenv("OLLAMA_MODEL", "qwen2.5:7b"),
             temperature=float(os.getenv("TEMPERATURE", "0.3")),
+            # Ollama's default 4096-token context is too small for a full quiz.
+            options={"num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "8192"))},
+            # Small local models rarely call the structured-output tool, so make
+            # Ollama itself constrain the reply to the schema instead.
+            additional_args={"format": output_schema} if output_schema else None,
         )
 
-    raise ValueError(f"Unknown MODEL_PROVIDER '{provider}'. Use 'bedrock' or 'ollama'.")
+    raise ValueError(f"Unknown MODEL_PROVIDER '{name}'. Use 'bedrock' or 'ollama'.")
 
 
 def db_path() -> str:

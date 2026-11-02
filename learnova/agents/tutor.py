@@ -34,6 +34,6 @@ def build_plan(concept: Concept, lesson_excerpt: str, language: str, difficulty:
         f"Student's mistakes:\n{mistake_lines}\n\n"
         f"Lesson for reference:\n<lesson>\n{lesson_excerpt}\n</lesson>"
     )
-    plan = structured(make_agent(SYSTEM_PROMPT), TutoringPlan, prompt)
+    plan = structured(make_agent(SYSTEM_PROMPT, output_model=TutoringPlan), TutoringPlan, prompt)
     plan.concept_id = concept.id
     return plan
