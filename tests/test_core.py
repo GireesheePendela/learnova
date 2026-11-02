@@ -5,7 +5,7 @@ Run with:  python -m unittest discover tests
 import unittest
 from unittest import mock
 
-from learnova import session
+from learnova import session, speech
 import random
 
 from learnova.grading import check_diagnostic, check_quizzes, mastery_report, shuffle_options, weakest_concept
@@ -67,6 +67,36 @@ class CheckQuizzesTest(unittest.TestCase):
         a = analysis()
         a.quiz_a = a.quiz_a[:2]
         self.assertTrue(any("no diagnostic question" in p for p in check_diagnostic(a)))
+
+
+class SpeechTest(unittest.TestCase):
+    def test_speakable_strips_markdown_and_direction_marks(self):
+        lri, pdi, nl = chr(0x2066), chr(0x2069), chr(10)
+        text = f"**नियम:** अंश {lri}(numerator){pdi}{nl}- पहला कदम{nl}# Title"
+        self.assertEqual(speech.speakable(text), "नियम: अंश (numerator) पहला कदम Title")
+
+    def test_only_languages_with_a_voice_get_read_aloud(self):
+        with mock.patch.dict("os.environ", {"READ_ALOUD": "on"}):
+            self.assertTrue(speech.available("Hindi"))
+            self.assertFalse(speech.available("Swahili"))
+        with mock.patch.dict("os.environ", {"READ_ALOUD": "off"}):
+            self.assertFalse(speech.available("Hindi"))
+
+    def test_falls_back_to_standard_voice(self):
+        from botocore.exceptions import ClientError
+
+        calls = []
+
+        def synthesize_speech(**kwargs):
+            calls.append(kwargs["Engine"])
+            if kwargs["Engine"] == "neural":
+                raise ClientError({"Error": {"Code": "ValidationException", "Message": "engine"}}, "SynthesizeSpeech")
+            return {"AudioStream": mock.Mock(read=lambda: b"mp3")}
+
+        speech.synthesize.cache_clear()
+        with mock.patch("boto3.client", return_value=mock.Mock(synthesize_speech=synthesize_speech)):
+            self.assertEqual(speech.synthesize("hello", "English"), b"mp3")
+        self.assertEqual(calls, ["neural", "standard"])
 
 
 class SessionTest(unittest.TestCase):

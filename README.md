@@ -10,8 +10,12 @@ academic terms, and adapts practice to how they actually perform. The student ne
 work out what to ask: the system keeps a concept-level mastery record and decides what comes next.
 
 It works in 10 languages (Hindi, Spanish, Bengali, Arabic, Portuguese, Swahili, Vietnamese,
-Chinese, Tagalog, English), lays Arabic out right-to-left, and runs on any lesson the student
-or teacher uploads, not only the built-in math and science samples.
+Chinese, Tagalog, English), lays Arabic out right-to-left, reads lessons and quizzes aloud with
+Amazon Polly for students who are more comfortable listening than reading, and runs on any lesson
+the student or teacher uploads, not only the built-in math and science samples.
+
+AWS services: **Amazon Bedrock** (the three agents' models) and **Amazon Polly** (read-aloud).
+Students never need an account or pay anything; whoever hosts the app pays for its AWS usage.
 
 ## How it works
 
@@ -73,6 +77,7 @@ cp .env.example .env        # works as is; optionally choose models (see list_mo
 python -m unittest discover tests
 python scripts/list_models.py          # models this account offers (to pick a larger one)
 python scripts/check_model.py          # ~10s: confirms Bedrock access and each agent's model id
+python scripts/check_speech.py         # ~10s: confirms Amazon Polly read-aloud works
 python scripts/smoke_content.py Hindi  # Content Agent only: concepts + parallel quizzes
 python scripts/smoke_content.py Hindi photosynthesis   # same, on the science sample
 python scripts/smoke_languages.py      # Content Agent in every supported language (a few minutes)
@@ -105,6 +110,7 @@ learnova/agents/           content.py, assessment.py, tutor.py, common.py
 learnova/grading.py        Grading, mastery, quiz comparability checks (no LLM)
 learnova/store.py          SQLite: lessons, attempts, tutoring decisions
 learnova/session.py        Workflow shared by both UIs
+learnova/speech.py         Read-aloud with Amazon Polly
 data/                      Built-in sample lessons (fractions, photosynthesis)
 tests/                     Unit tests for the deterministic parts
 ```
@@ -114,6 +120,8 @@ tests/                     Unit tests for the deterministic parts
 - **Start:** pick a language and a sample lesson (fractions or photosynthesis) or upload a .txt/.md/.pdf lesson. Name is optional.
 - **Diagnostic Quiz A**, then a **Learn** page per concept: why this concept was chosen, a short explanation in
   the student's language with English terms kept, a worked example, a glossary and practice with hints.
+- **🔊 Listen** buttons read the lesson, quizzes and practice aloud with Amazon Polly (Hindi, Arabic, Spanish,
+  Portuguese, Chinese, English; the button is hidden for languages without a Polly voice).
 - **Follow-up Quiz B** and a **Progress** page: Quiz A vs Quiz B per concept, mastery bars, answer review with
   explanations, and a downloadable CSV report for a teacher or parent.
 - The step bar lets the student move back to any step already reached.
@@ -139,4 +147,5 @@ long-term retention. Any results in the project write-up are labelled with how t
 
 - Text-based PDFs only (scanned pages would need OCR, e.g. Amazon Textract).
 - Progress lasts as long as the SQLite file. In the sandbox that is one session.
-- Planned: read-aloud with Amazon Polly, Bedrock Guardrails, persistent storage (DynamoDB), spaced review across days.
+- Read-aloud covers 6 of the 10 languages; Polly has no Bengali, Swahili, Vietnamese or Tagalog voice.
+- Planned: Bedrock Guardrails, persistent storage (DynamoDB), spaced review across days.

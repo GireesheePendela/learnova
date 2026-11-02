@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-from learnova import session
+from learnova import session, speech
 from learnova.config import db_path
 from learnova.lesson import LANGUAGES, RTL_LANGUAGES, SAMPLES, sample_lesson, text_from_upload
 from learnova.store import Store
@@ -38,7 +38,7 @@ def fmt(p):
 
 def term(name: str, english: str) -> str:
     """'name (english)' with the English part isolated, so its brackets stay in place in Arabic text."""
-    return f"{name} ⁦({english})⁩"
+    return f"{name} {chr(0x2066)}({english}){chr(0x2069)}"  # left-to-right isolate ... pop
 
 
 def go(stage: str):
@@ -89,6 +89,26 @@ def concept_bars(report: list[dict]) -> str:
             f'<div class="lv-track"><div class="lv-fill{" mastered" if r["mastered"] else ""}" '
             f'style="width:{mastery * 100:.0f}%"></div></div><div class="lv-chips">{chips}</div></div>')
     return "".join(rows)
+
+
+def listen(key: str, text: str, language: str):
+    """A Listen button that reads text aloud with Amazon Polly in the student's language."""
+    if not speech.available(language):
+        return
+    audio_key = f"audio_{key}"
+    clicked = st.button("🔊 Listen", key=f"listen_{key}", help="Read this aloud")
+    if clicked:
+        try:
+            state[audio_key] = speech.synthesize(text, language)
+        except Exception as e:  # read-aloud is a nice-to-have; never break the lesson over it
+            st.caption(f"Read-aloud isn't available right now ({type(e).__name__}).")
+    if audio_key in state:
+        st.audio(state[audio_key], format="audio/mpeg", autoplay=clicked)
+
+
+def quiz_text(questions) -> str:
+    """Questions and their options as one passage for read-aloud."""
+    return " ".join(f"{i + 1}. {q.question} " + " ; ".join(q.options) + "." for i, q in enumerate(questions))
 
 
 def quiz_form(questions, key: str):
@@ -217,6 +237,7 @@ if state.stage == "preparing":
 if state.stage == "quiz_a":
     if not done_a:
         title("Step 1 · Diagnostic", "Quiz A", "No pressure: this only shows the tutor where to start.")
+        listen(f"quiz_a_{lesson_id}", quiz_text(analysis.quiz_a), row["language"])
         answers = quiz_form(analysis.quiz_a, "quiz_a")
         if answers is not None:
             session.submit_quiz(store, lesson_id, "quiz_a", answers)
@@ -252,6 +273,7 @@ if state.stage == "learn":
 
     lesson_col, terms_col = st.columns([3, 2], gap="large")
     with lesson_col:
+        listen(f"lesson_{d['decision_id']}", f"{plan.explanation} {plan.worked_example}", row["language"])
         with st.container(key="card_explanation"):
             st.markdown(plan.explanation)
         st.markdown("#### Worked example")
@@ -265,6 +287,7 @@ if state.stage == "learn":
     st.markdown("#### Practice")
     results_key = f"results_{d['decision_id']}"
     if results_key not in state:
+        listen(f"practice_{d['decision_id']}", quiz_text(plan.practice), row["language"])
         answers = quiz_form(plan.practice, f"practice_{d['decision_id']}")
         if answers is not None:
             state[results_key] = (answers, session.submit_practice(
@@ -306,6 +329,7 @@ if state.stage == "quiz_b":
         title("Step 3 · Follow-up", "Quiz B", "Same concepts and difficulty as Quiz A, new questions.")
         if state.get("decision") is None:
             st.success("The Assessment Agent found every concept mastered. Let's confirm with Quiz B.")
+        listen(f"quiz_b_{lesson_id}", quiz_text(analysis.quiz_b), row["language"])
         answers = quiz_form(analysis.quiz_b, "quiz_b")
         if answers is not None:
             session.submit_quiz(store, lesson_id, "quiz_b", answers)
