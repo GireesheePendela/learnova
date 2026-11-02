@@ -82,6 +82,7 @@ python scripts/smoke_content.py Hindi  # Content Agent only: concepts + parallel
 python scripts/smoke_content.py Hindi photosynthesis   # same, on the science sample
 python scripts/smoke_languages.py      # Content Agent in every supported language (a few minutes)
 python scripts/smoke_flow.py Hindi     # whole session with a simulated student
+python scripts/simulate_learners.py    # 4 simulated learners: how the agents adapt to each (~5-10 min)
 streamlit run app.py --server.port 8501 --server.headless true
 ```
 
