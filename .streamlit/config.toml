@@ -1,11 +1,11 @@
-# Learnova's three colours: ink (background), violet and aqua (accents and the gradient).
-# Lighter ink shades and white text are only used for contrast.
+# Learnova's "Marina" palette: cream (background), sky blue (surfaces), deep blue (text and
+# main actions) and brown (accents). Tints of these are used for cards and borders.
 [theme]
-base = "dark"
-primaryColor = "#7C5CFF"
-backgroundColor = "#0D0F2B"
-secondaryBackgroundColor = "#181A45"
-textColor = "#F3F2FF"
+base = "light"
+primaryColor = "#326080"
+backgroundColor = "#FFF1E7"
+secondaryBackgroundColor = "#B5D2E6"
+textColor = "#326080"
 font = "sans serif"
 
 [client]

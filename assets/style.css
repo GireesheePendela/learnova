@@ -1,14 +1,16 @@
-/* Learnova look: three colours (ink, violet, aqua) and a violet -> aqua gradient. */
+/* Learnova look: the "Marina" palette. cream #FFF1E7, sky #B5D2E6, deep blue #326080, brown #805232. */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600&display=swap');
 
 :root {
-  --ink: #0D0F2B;
-  --violet: #7C5CFF;
-  --aqua: #22D3EE;
-  --grad: linear-gradient(120deg, var(--violet), var(--aqua));
-  --card: rgba(124, 92, 255, 0.08);
-  --line: rgba(124, 92, 255, 0.30);
-  --muted: rgba(243, 242, 255, 0.68);
+  --cream: #FFF1E7;
+  --sky: #B5D2E6;
+  --deep: #326080;
+  --brown: #805232;
+  --grad: linear-gradient(120deg, var(--deep), var(--brown));
+  --card: rgba(255, 255, 255, 0.55);
+  --line: rgba(50, 96, 128, 0.18);
+  --muted: rgba(50, 96, 128, 0.75);
+  --shadow: 0 10px 30px rgba(50, 96, 128, 0.10);
 }
 
 /* Streamlit's icons use their own font (stIconMaterial), so leave those alone. */
@@ -17,17 +19,20 @@
 .stApp span:not([data-testid="stIconMaterial"]) {
   font-family: 'Poppins', 'Noto Sans Arabic', 'Noto Sans', system-ui, sans-serif;
 }
+.stApp h1, .stApp h2, .stApp h3, .stApp h4 { color: var(--deep); }
 
-/* Page background: ink with soft violet and aqua glows */
+/* Page background: cream with soft sky-blue light */
 .stApp {
   background:
-    radial-gradient(1100px 520px at 0% -8%, rgba(124, 92, 255, 0.28), transparent 60%),
-    radial-gradient(900px 480px at 100% 0%, rgba(34, 211, 238, 0.16), transparent 60%),
-    var(--ink);
+    radial-gradient(1000px 520px at 0% -10%, rgba(181, 210, 230, 0.75), transparent 60%),
+    radial-gradient(800px 460px at 100% 0%, rgba(181, 210, 230, 0.45), transparent 60%),
+    var(--cream);
 }
 header[data-testid="stHeader"] { background: transparent; }
 .stAppDeployButton, #MainMenu, footer { display: none !important; }
-.block-container { max-width: 1040px; padding-top: 1.5rem; padding-bottom: 4rem; }
+.block-container { max-width: 1060px; padding-top: 1.2rem; padding-bottom: 2rem; }
+/* The zero-height helper that scrolls the page to the top */
+[data-testid="stElementContainer"]:has(iframe[height="0"]) { display: none; }
 
 /* Every paragraph picks its own direction from its first letter, so Arabic reads
    right-to-left and English left-to-right even when mixed on one page. */
@@ -42,102 +47,160 @@ header[data-testid="stHeader"] { background: transparent; }
   text-align: start;
 }
 
-/* Top navigation bar */
-.lv-nav {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 0.7rem 1.1rem; margin-bottom: 1.6rem;
-  border: 1px solid var(--line); border-radius: 16px;
-  background: rgba(13, 15, 43, 0.65); backdrop-filter: blur(8px);
+/* Top navigation: logo plus clickable steps (Streamlit buttons inside .st-key-nav) */
+.st-key-nav {
+  padding: 0.55rem 0.9rem; margin-bottom: 1.4rem; border-radius: 18px;
+  background: rgba(255, 241, 231, 0.8); border: 1px solid var(--line); box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
 }
-.lv-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.25rem; }
+.st-key-nav [data-testid="stHorizontalBlock"] { align-items: center; }
+.lv-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.25rem; color: var(--deep); }
 .lv-mark {
   width: 34px; height: 34px; border-radius: 10px; background: var(--grad);
-  display: grid; place-items: center; color: var(--ink); font-weight: 800;
+  display: grid; place-items: center; color: var(--cream); font-weight: 800;
 }
-.lv-steps { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.lv-step {
-  font-size: 0.78rem; padding: 0.3rem 0.75rem; border-radius: 999px;
-  border: 1px solid var(--line); color: var(--muted);
+.st-key-nav button {
+  border-radius: 999px !important; font-size: 0.8rem !important; min-height: 2rem !important;
+  padding: 0.2rem 0.6rem !important; white-space: nowrap;
 }
-.lv-step.done { color: var(--aqua); border-color: rgba(34, 211, 238, 0.45); }
-.lv-step.now { background: var(--grad); color: var(--ink); border-color: transparent; font-weight: 600; }
+.st-key-nav button[kind="secondary"] { background: transparent !important; color: var(--deep) !important; }
+.st-key-nav button:disabled { opacity: 0.45; border-style: dashed !important; }
 
 /* Hero on the start page */
-.lv-hero { text-align: center; padding: 1.2rem 0 2rem; }
+.lv-hero { text-align: center; padding: 1rem 0 2rem; }
 .lv-eyebrow {
-  display: inline-block; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.3rem 0.8rem; border-radius: 999px; border: 1px solid var(--line); color: var(--aqua);
+  display: inline-block; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  padding: 0.3rem 0.85rem; border-radius: 999px; background: rgba(128, 82, 50, 0.10); color: var(--brown);
 }
 .lv-hero h1 {
-  font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.12; margin: 0.9rem 0 0.6rem; font-weight: 700;
+  font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.12; margin: 0.9rem 0 0.6rem; font-weight: 700; color: var(--deep);
 }
 .lv-grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lv-hero p { color: var(--muted); font-size: 1.08rem; max-width: 640px; margin: 0 auto; }
+.lv-badges { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1.1rem; }
+.lv-badge {
+  font-size: 0.82rem; padding: 0.35rem 0.8rem; border-radius: 999px;
+  background: rgba(181, 210, 230, 0.55); color: var(--deep);
+}
 
 /* Page headings inside a session */
-.lv-title { margin: 0.4rem 0 1rem; }
-.lv-title small { color: var(--aqua); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; }
-.lv-title h2 { font-size: 1.9rem; margin: 0.2rem 0 0.3rem; padding: 0; unicode-bidi: plaintext; }
+.lv-title { margin: 0.2rem 0 1rem; }
+.lv-title small { color: var(--brown); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; font-weight: 600; }
+.lv-title h2 { font-size: 1.9rem; margin: 0.2rem 0 0.3rem; padding: 0; color: var(--deep); unicode-bidi: plaintext; }
 .lv-title p { color: var(--muted); margin: 0; }
 
 /* Cards */
 .lv-card {
   background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 1.1rem 1.2rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.8rem; box-shadow: var(--shadow); color: var(--deep);
 }
-.lv-card h4 { margin: 0 0 0.3rem; font-size: 1rem; }
+.lv-card h4 { margin: 0 0 0.3rem; font-size: 1rem; color: var(--deep); }
 .lv-card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
 .lv-num {
   display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px;
-  background: var(--grad); color: var(--ink); font-weight: 700; font-size: 0.85rem; margin-right: 0.5rem;
+  background: var(--grad); color: var(--cream); font-weight: 700; font-size: 0.85rem; margin-right: 0.5rem;
 }
-.lv-reason { border-left: 4px solid var(--aqua); }
+
+/* Loading screen shown at the top while an agent works */
+.lv-loading {
+  text-align: center; padding: 2.4rem 1.5rem; border-radius: 22px; margin: 0.5rem 0 1.5rem;
+  background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.lv-loading h3 { margin: 1rem 0 0.4rem; color: var(--deep); }
+.lv-loading p { color: var(--muted); margin: 0 auto; max-width: 520px; }
+.lv-spinner {
+  width: 54px; height: 54px; margin: 0 auto; border-radius: 50%;
+  border: 5px solid rgba(181, 210, 230, 0.8); border-top-color: var(--deep); border-right-color: var(--brown);
+  animation: lv-spin 0.9s linear infinite;
+}
+.lv-bar { height: 6px; border-radius: 999px; background: rgba(181, 210, 230, 0.6); overflow: hidden; margin: 1.3rem auto 0; max-width: 360px; }
+.lv-bar span { display: block; height: 100%; width: 40%; border-radius: 999px; background: var(--grad); animation: lv-slide 1.6s ease-in-out infinite; }
+/* While loading, hide the previous page's leftovers that Streamlit shows faded out */
+.stApp:has(.lv-loading) [data-testid="stMain"] [data-stale="true"] { display: none; }
+@keyframes lv-spin { to { transform: rotate(360deg); } }
+@keyframes lv-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+
+/* Concept progress (sidebar and progress page) */
+.lv-concept { margin-bottom: 0.85rem; }
+.lv-concept-head { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.88rem; font-weight: 500; }
+.lv-concept-name { unicode-bidi: plaintext; }
+.lv-track { height: 8px; border-radius: 999px; background: rgba(181, 210, 230, 0.55); margin: 0.35rem 0 0.25rem; overflow: hidden; }
+.lv-fill { height: 100%; border-radius: 999px; background: var(--deep); }
+.lv-fill.mastered { background: var(--brown); }
+.lv-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; font-size: 0.72rem; }
+.lv-chip { padding: 0.08rem 0.5rem; border-radius: 999px; background: rgba(181, 210, 230, 0.5); }
+.lv-chip.up { background: rgba(128, 82, 50, 0.14); color: var(--brown); font-weight: 600; }
+
+/* Answer review */
+.lv-review { border-left: 1px solid var(--line); border-inline-start: 4px solid var(--sky); }
+.lv-review.right { border-inline-start-color: var(--deep); }
+.lv-review.wrong { border-inline-start-color: var(--brown); }
+.lv-review h4 { unicode-bidi: plaintext; }
+.lv-review p { unicode-bidi: plaintext; text-align: start; margin-top: 0.3rem; }
+.lv-tag { font-size: 0.75rem; font-weight: 600; padding: 0.1rem 0.55rem; border-radius: 999px; margin-left: 0.4rem; }
+.lv-tag.right { background: rgba(50, 96, 128, 0.12); color: var(--deep); }
+.lv-tag.wrong { background: rgba(128, 82, 50, 0.14); color: var(--brown); }
+
+/* Footer */
+.lv-footer {
+  margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted);
+}
 
 /* Streamlit containers styled as cards */
-[data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"] details,
-[class*="st-key-card"] {
-  background: var(--card); border: 1px solid var(--line) !important; border-radius: 18px;
+[data-testid="stForm"], [data-testid="stMetric"], [data-testid="stExpander"] details, [class*="st-key-card"] {
+  background: var(--card); border: 1px solid var(--line) !important; border-radius: 18px; box-shadow: var(--shadow);
 }
 [data-testid="stForm"], [class*="st-key-card"] { padding: 1.4rem 1.5rem; }
 [data-testid="stMetric"] { padding: 1rem 1.2rem; }
-[data-testid="stMetricValue"] { font-weight: 700; }
-[data-testid="stMetricDelta"] { color: var(--aqua) !important; background: rgba(34, 211, 238, 0.12) !important; }
-[data-testid="stMetricDelta"] svg { fill: var(--aqua) !important; }
+[data-testid="stMetricValue"] { font-weight: 700; color: var(--deep); }
+[data-testid="stMetricDelta"] { color: var(--brown) !important; background: rgba(128, 82, 50, 0.12) !important; }
+[data-testid="stMetricDelta"] svg { fill: var(--brown) !important; }
 
-/* Quiz questions: one full-width block per question, clear spacing */
+/* Quiz questions: one full-width block per question */
 [data-testid="stForm"] [data-testid="stElementContainer"]:has(> [data-testid="stRadio"]) { width: 100%; }
 [data-testid="stForm"] [data-testid="stRadio"] {
   width: 100%; box-sizing: border-box;
   padding: 0.9rem 1rem; margin-bottom: 0.7rem; border-radius: 14px;
-  background: rgba(13, 15, 43, 0.55); border: 1px solid rgba(124, 92, 255, 0.18);
+  background: rgba(255, 255, 255, 0.7); border: 1px solid var(--line);
 }
 [data-testid="stRadio"] [data-testid="stWidgetLabel"] p { font-size: 1.02rem; font-weight: 500; }
 
-/* Buttons: gradient for the main action, outline for the rest */
+/* Buttons: deep blue to brown gradient for the main action, outline for the rest */
 button[kind="primary"], button[kind="primaryFormSubmit"] {
-  background: var(--grad) !important; color: var(--ink) !important; border: 0 !important;
-  border-radius: 999px !important; font-weight: 600 !important; padding: 0.55rem 1.4rem !important;
-  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+  background: var(--grad) !important; color: var(--cream) !important; border: 0 !important;
+  border-radius: 999px !important; font-weight: 600 !important; box-shadow: 0 8px 22px rgba(50, 96, 128, 0.25);
 }
+button[kind="primary"] p, button[kind="primaryFormSubmit"] p { color: var(--cream) !important; }
 button[kind="primary"]:hover, button[kind="primaryFormSubmit"]:hover { filter: brightness(1.08); }
 button[kind="secondary"], button[kind="secondaryFormSubmit"] {
-  border-radius: 999px !important; border: 1px solid var(--line) !important; background: transparent !important;
+  border-radius: 999px !important; border: 1px solid var(--line) !important;
+  background: rgba(255, 255, 255, 0.6) !important; color: var(--deep) !important;
 }
+button[kind="secondary"]:hover { border-color: var(--deep) !important; }
 
-/* Alerts in the palette: correct answers in aqua, hints and notes in violet */
+/* Alerts in the palette: correct answers in blue, hints and notes in brown */
 [data-testid="stAlertContainer"] {
-  border-radius: 14px; color: #F3F2FF !important;
-  background: rgba(124, 92, 255, 0.14) !important; border: 1px solid var(--line);
+  border-radius: 14px; background: rgba(128, 82, 50, 0.09) !important; border: 1px solid rgba(128, 82, 50, 0.25);
 }
+[data-testid="stAlertContainer"] p { color: var(--brown) !important; }
 [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) {
-  background: rgba(34, 211, 238, 0.12) !important; border-color: rgba(34, 211, 238, 0.45);
+  background: rgba(181, 210, 230, 0.45) !important; border-color: rgba(50, 96, 128, 0.3);
 }
-[data-testid="stAlertContainer"] p { color: #F3F2FF !important; }
-[data-testid="stAlertContainer"] [data-testid="stIconMaterial"] { color: var(--aqua) !important; }
-[data-testid="stTable"] table { border-radius: 14px; overflow: hidden; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) p { color: var(--deep) !important; }
 
-/* Sidebar */
-[data-testid="stSidebar"] { background: rgba(13, 15, 43, 0.92); border-right: 1px solid var(--line); }
+[data-testid="stTable"] table { border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, 0.6); }
+
+/* Sidebar in deep blue */
+[data-testid="stSidebar"] { background: var(--deep); }
+[data-testid="stSidebar"] * { color: var(--cream); }
+[data-testid="stSidebar"] .lv-track { background: rgba(255, 241, 231, 0.2); }
+[data-testid="stSidebar"] .lv-fill { background: var(--sky); }
+[data-testid="stSidebar"] .lv-fill.mastered { background: var(--cream); }
+[data-testid="stSidebar"] .lv-chip { background: rgba(255, 241, 231, 0.14); }
+[data-testid="stSidebar"] .lv-chip.up { background: rgba(255, 241, 231, 0.3); color: var(--cream); }
+[data-testid="stSidebar"] button { background: transparent !important; border-color: rgba(255, 241, 231, 0.4) !important; }
+[data-testid="stSidebar"] button p { color: var(--cream) !important; }
 
 /* Arabic and other right-to-left lessons: lay out lesson content from the right.
    The .lv-rtl marker is added by app.py only when the student's language is right-to-left. */
@@ -145,14 +208,18 @@ button[kind="secondary"], button[kind="secondaryFormSubmit"] {
 .stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stRadio"],
 .stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stTable"],
 .stApp:has(.lv-rtl) [data-testid="stMain"] [data-testid="stAlert"],
+.stApp:has(.lv-rtl) .lv-review,
 .stApp:has(.lv-rtl) [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
   direction: rtl;
 }
-.stApp:has(.lv-rtl) .lv-nav, .stApp:has(.lv-rtl) .lv-title,
+.stApp:has(.lv-rtl) .st-key-nav, .stApp:has(.lv-rtl) .lv-title,
 .stApp:has(.lv-rtl) [data-testid="stMetric"] [data-testid="stMarkdownContainer"] { direction: ltr; }
 
-/* Phones: stack the step bar under the logo */
+/* Phones */
 @media (max-width: 640px) {
-  .lv-nav { flex-direction: column; align-items: flex-start; }
-  .lv-step { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
+  .st-key-nav [data-testid="stHorizontalBlock"] { flex-flow: row wrap !important; gap: 0.35rem !important; }
+  .st-key-nav [data-testid="stColumn"] { min-width: 0 !important; width: auto !important; flex: 1 1 28% !important; }
+  .st-key-nav [data-testid="stColumn"]:first-child { flex-basis: 100% !important; }
+  .st-key-nav button { font-size: 0.72rem !important; }
+  .lv-footer { flex-direction: column; }
 }
