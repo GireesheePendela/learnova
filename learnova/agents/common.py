@@ -7,12 +7,36 @@ from ..config import get_model, provider
 
 T = TypeVar("T", bound=BaseModel)
 
+# Bedrock errors that mean "busy, try again", not "your request is wrong".
+TRANSIENT_ERROR_CODES = {
+    "throttlingexception", "serviceunavailableexception", "internalserverexception",
+    "modelstreamerrorexception", "modelnotreadyexception",
+}
+
+try:
+    from strands import ModelRetryStrategy
+
+    class TransientErrorRetry(ModelRetryStrategy):
+        """Strands retries throttling by default; also retry Bedrock's temporary outages."""
+
+        def is_retryable(self, exception: Exception) -> bool:
+            code = str(getattr(exception, "response", {}).get("Error", {}).get("Code", "")).lower()
+            return super().is_retryable(exception) or code in TRANSIENT_ERROR_CODES
+
+    def _retry_kwargs() -> dict:
+        # Waits 2s, 4s, 8s, 16s between attempts.
+        return {"retry_strategy": TransientErrorRetry(max_attempts=5, initial_delay=2, max_delay=30)}
+except ImportError:  # older Strands versions: keep their built-in throttling retry
+    def _retry_kwargs() -> dict:
+        return {}
+
 
 def make_agent(system_prompt: str, tools: list | None = None, output_model: type[BaseModel] | None = None,
                role: str | None = None) -> Agent:
     schema = output_model.model_json_schema() if output_model else None
     # callback_handler=None stops Strands from streaming tokens to stdout.
-    return Agent(model=get_model(schema, role), system_prompt=system_prompt, tools=tools or [], callback_handler=None)
+    return Agent(model=get_model(schema, role), system_prompt=system_prompt, tools=tools or [],
+                 callback_handler=None, **_retry_kwargs())
 
 
 def structured(agent: Agent, output_model: type[T], prompt: str) -> T:
