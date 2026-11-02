@@ -33,7 +33,9 @@ QUESTION_RULES = """Rules for every question:
   usual script (Devanagari for Hindi, Bengali script for Bengali, Arabic script for Arabic,
   simplified characters for Chinese), keeping the English academic term in parentheses the first
   time it appears, e.g. "हर (denominator)". If the student's language is English, just write English.
-- Address the student informally and consistently (e.g. तुम in Hindi, tú in Spanish).
+- Address the student informally and consistently (e.g. तुम in Hindi, tú in Spanish, أنت in Arabic),
+  but always in the standard written form of the language used in schools (e.g. Modern
+  Standard Arabic), never dialect or slang.
 """
 
 DIAGNOSTIC_PROMPT = f"""{ROLE}

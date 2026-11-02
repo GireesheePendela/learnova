@@ -29,7 +29,9 @@ Always:
    mistakes (get_mistakes marks them); do not say the student still makes a mistake they have
    since stopped making. Write the reason in the
    student's language and its usual script, keeping English academic terms in parentheses, and
-   address the student informally (e.g. तुम in Hindi, tú in Spanish).
+   address the student informally (e.g. तुम in Hindi, tú in Spanish, أنت in Arabic), but in the
+   standard written form of the language used in schools (e.g. Modern Standard Arabic), never
+   dialect or slang.
 
 If every assessed concept is ready, do not call assign_tutoring; reply ALL_MASTERED.
 After acting, reply with one short sentence in English explaining your decision (for the teacher).

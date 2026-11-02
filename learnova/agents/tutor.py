@@ -22,7 +22,9 @@ Teaching rules:
   or position; they are shuffled afterwards.
 - Write in the student's language and its usual script (Devanagari for Hindi, Bengali script for
   Bengali, Arabic script for Arabic, simplified characters for Chinese).
-- Address the student informally and consistently throughout (e.g. तुम in Hindi, tú in Spanish).
+- Address the student informally and consistently throughout (e.g. तुम in Hindi, tú in Spanish,
+  أنت in Arabic), but always in the standard written form of the language used in schools (e.g. Modern
+  Standard Arabic), never dialect or slang.
 - If the student's language is English, still keep the glossary of key terms.
 """
 
