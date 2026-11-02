@@ -7,7 +7,7 @@ from typing import Callable, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from ..grading import check_diagnostic, check_quizzes
+from ..grading import check_diagnostic, check_quizzes, shuffle_options
 from ..schemas import DiagnosticDraft, FollowUpQuiz, LessonAnalysis
 from .common import make_agent, structured
 
@@ -26,11 +26,13 @@ QUESTION_RULES = """Rules for every question:
   holds the correct option.
 - Wrong options should reflect real misconceptions (for fractions, e.g. adding denominators).
 - Solve each question yourself before writing answer_index, and put the solution in explanation.
+  Never refer to options by letter or position ("option b"); options are shuffled afterwards.
 - Only test what the lesson teaches.
 - Write questions, options, explanations and concept names in the student's language and its
   usual script (Devanagari for Hindi, Bengali script for Bengali, Arabic script for Arabic,
   simplified characters for Chinese), keeping the English academic term in parentheses the first
   time it appears, e.g. "हर (denominator)". If the student's language is English, just write English.
+- Address the student informally and consistently (e.g. तुम in Hindi, tú in Spanish).
 """
 
 DIAGNOSTIC_PROMPT = f"""{ROLE}
@@ -86,7 +88,8 @@ def draft_diagnostic(lesson_text: str, language: str, max_attempts: int = 2) -> 
 
     draft = _generate(DIAGNOSTIC_PROMPT, DiagnosticDraft, prompt,
                       lambda d: check_diagnostic(as_analysis(d)), max_attempts)
-    return as_analysis(draft)
+    analysis = as_analysis(draft)
+    return analysis.model_copy(update={"quiz_a": shuffle_options(analysis.quiz_a)})
 
 
 def write_follow_up(analysis: LessonAnalysis, lesson_text: str, language: str,
@@ -104,7 +107,7 @@ def write_follow_up(analysis: LessonAnalysis, lesson_text: str, language: str,
 
     follow_up = _generate(FOLLOW_UP_PROMPT, FollowUpQuiz, prompt,
                           lambda f: check_quizzes(with_quiz_b(f)), max_attempts)
-    return with_quiz_b(follow_up)
+    return analysis.model_copy(update={"quiz_b": shuffle_options(follow_up.quiz_b)})
 
 
 def analyze_lesson(lesson_text: str, language: str, max_attempts: int = 2) -> LessonAnalysis:

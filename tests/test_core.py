@@ -6,7 +6,9 @@ import unittest
 from unittest import mock
 
 from learnova import session
-from learnova.grading import check_diagnostic, check_quizzes, mastery_report, weakest_concept
+import random
+
+from learnova.grading import check_diagnostic, check_quizzes, mastery_report, shuffle_options, weakest_concept
 from learnova.schemas import Concept, LessonAnalysis, PracticeQuestion, QuizQuestion, TutoringPlan
 from learnova.store import Store
 
@@ -47,6 +49,14 @@ class CheckQuizzesTest(unittest.TestCase):
         a = analysis()
         a.quiz_a[0] = q("c9", 1, "a1")
         self.assertTrue(any("unknown concept_id" in p for p in check_quizzes(a)))
+
+    def test_shuffle_keeps_correct_answer_and_spreads_positions(self):
+        questions = [QuizQuestion(concept_id="c1", difficulty=1, question=f"q{i}", options=["right", "w1", "w2", "w3"],
+                                  answer_index=0, explanation="...") for i in range(40)]
+        shuffled = shuffle_options(questions, random.Random(1))
+        self.assertTrue(all(s.options[s.answer_index] == "right" for s in shuffled))
+        self.assertTrue(all(sorted(s.options) == sorted(q.options) for s, q in zip(shuffled, questions)))
+        self.assertEqual(len({s.answer_index for s in shuffled}), 4)
 
     def test_diagnostic_checked_without_quiz_b(self):
         a = analysis().model_copy(update={"quiz_b": []})

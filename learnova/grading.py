@@ -1,14 +1,35 @@
 """Deterministic grading, mastery scores and quiz checks. No LLM is involved here."""
 
+import random
 from collections import Counter, defaultdict
+from typing import TypeVar
+
+from pydantic import BaseModel
 
 from .schemas import LessonAnalysis
 
 MASTERY_THRESHOLD = 0.8
 
+Q = TypeVar("Q", bound=BaseModel)
+
 
 def is_correct(answer_index: int, chosen_index: int | None) -> bool:
     return chosen_index is not None and chosen_index == answer_index
+
+
+def shuffle_options(questions: list[Q], rng: random.Random | None = None) -> list[Q]:
+    """Models tend to put the correct option in the same position (often b), so shuffle each
+    question's options and move answer_index with the correct one."""
+    rng = rng or random.Random()
+    shuffled = []
+    for q in questions:
+        order = list(range(len(q.options)))
+        rng.shuffle(order)
+        shuffled.append(q.model_copy(update={
+            "options": [q.options[i] for i in order],
+            "answer_index": order.index(q.answer_index),
+        }))
+    return shuffled
 
 
 def concept_scores(attempts, phases: tuple[str, ...]) -> dict[str, tuple[int, int]]:

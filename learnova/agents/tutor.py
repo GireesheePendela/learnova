@@ -1,5 +1,6 @@
 """Tutor Agent: bilingual explanation, worked example and targeted practice for one concept."""
 
+from ..grading import shuffle_options
 from ..schemas import Concept, TutoringPlan
 from .common import make_agent, structured
 
@@ -17,9 +18,11 @@ Teaching rules:
 - Use short sentences, everyday examples from the student's likely context, and one short worked example.
 - Write 3 practice questions at the requested difficulty, aimed at those mistakes. Each has
   exactly 4 options, one correct answer_index (solve it yourself first), a hint that nudges
-  without giving the answer away, and a step-by-step solution.
+  without giving the answer away, and a step-by-step solution. Never refer to options by letter
+  or position; they are shuffled afterwards.
 - Write in the student's language and its usual script (Devanagari for Hindi, Bengali script for
   Bengali, Arabic script for Arabic, simplified characters for Chinese).
+- Address the student informally and consistently throughout (e.g. तुम in Hindi, tú in Spanish).
 - If the student's language is English, still keep the glossary of key terms.
 """
 
@@ -40,4 +43,5 @@ def build_plan(concept: Concept, lesson_excerpt: str, language: str, difficulty:
     )
     plan = structured(make_agent(SYSTEM_PROMPT, output_model=TutoringPlan, role="tutor"), TutoringPlan, prompt)
     plan.concept_id = concept.id
+    plan.practice = shuffle_options(plan.practice)
     return plan

@@ -25,7 +25,8 @@ Always:
    - If practice on the last concept reached 0.8, move on.
 4. Call assign_tutoring exactly once with a focus that names the specific misconception you saw
    in the mistakes, and a one-sentence reason a student can read. Write the reason in the
-   student's language and its usual script, keeping English academic terms in parentheses.
+   student's language and its usual script, keeping English academic terms in parentheses, and
+   address the student informally (e.g. तुम in Hindi, tú in Spanish).
 
 If every assessed concept is mastered, do not call assign_tutoring; reply ALL_MASTERED.
 After acting, reply with one short sentence in English explaining your decision (for the teacher).
