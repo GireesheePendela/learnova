@@ -33,6 +33,10 @@ def get_model(output_schema: dict | None = None):
             kwargs["model_id"] = os.environ["BEDROCK_MODEL_ID"]
         if os.getenv("AWS_REGION"):
             kwargs["region_name"] = os.environ["AWS_REGION"]
+        # Strands fills max_tokens for models it knows; for others Bedrock's per-model default
+        # can be too small for a full bilingual quiz, so allow setting it explicitly.
+        if os.getenv("MAX_TOKENS"):
+            kwargs["max_tokens"] = int(os.environ["MAX_TOKENS"])
         return BedrockModel(**kwargs)
 
     if name == "ollama":

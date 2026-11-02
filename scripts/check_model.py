@@ -17,9 +17,12 @@ from learnova.config import get_model, provider  # noqa: E402
 
 print(f"MODEL_PROVIDER={provider()}  BEDROCK_MODEL_ID={os.getenv('BEDROCK_MODEL_ID', '(Strands default)')}  "
       f"AWS_REGION={os.getenv('AWS_REGION', '(default)')}")
+model = get_model()
+config = model.get_config()
+print(f"Resolved model_id={config.get('model_id')}  max_tokens={config.get('max_tokens', '(provider default)')}")
 start = time.time()
 try:
-    reply = Agent(model=get_model(), callback_handler=None)(
+    reply = Agent(model=model, callback_handler=None)(
         "Translate the math word 'denominator' into Hindi. Reply with the Hindi word only.")
 except Exception as e:
     print(f"FAILED: {type(e).__name__}: {e}")

@@ -5,6 +5,7 @@
 
 import faulthandler
 import json
+from collections import Counter
 import os
 import sys
 import time
@@ -34,5 +35,7 @@ for c in analysis.concepts:
     print(f"  {c.id} {c.name} ({c.english_term}) prerequisites={c.prerequisite_ids}")
 print(f"quiz_a: {len(analysis.quiz_a)} questions, quiz_b: {len(analysis.quiz_b)} questions, "
       f"problems: {check_quizzes(analysis)}")
+positions = Counter("abcd"[q.answer_index] for q in analysis.quiz_a + analysis.quiz_b)
+print(f"correct-answer positions (should be spread out): {dict(sorted(positions.items()))}")
 for q in analysis.quiz_a[:2]:
     print(json.dumps(q.model_dump(), ensure_ascii=False, indent=1))

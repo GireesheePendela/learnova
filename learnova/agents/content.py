@@ -2,6 +2,11 @@
 
 from pydantic import ValidationError
 
+try:
+    from strands.types.exceptions import StructuredOutputException
+except ImportError:  # older Strands versions raise ValidationError directly
+    StructuredOutputException = ValidationError
+
 from ..grading import check_quizzes
 from ..schemas import LessonAnalysis
 from .common import make_agent, structured
@@ -40,6 +45,9 @@ def analyze_lesson(lesson_text: str, language: str, max_attempts: int = 2) -> Le
             analysis = structured(make_agent(SYSTEM_PROMPT, output_model=LessonAnalysis), LessonAnalysis, request)
         except ValidationError as e:
             problems = [f"{'.'.join(map(str, err['loc']))}: {err['msg']}" for err in e.errors()[:10]]
+            continue
+        except StructuredOutputException as e:
+            problems = [str(e)[:1000]]
             continue
         problems = check_quizzes(analysis)
         if not problems:
