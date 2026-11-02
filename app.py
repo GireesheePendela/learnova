@@ -168,7 +168,7 @@ if state.stage == "setup":
     with left:
         with st.container(key="card_start"):
             st.markdown("#### Start a session")
-            name = st.text_input("Nickname (optional)", placeholder="e.g. Asha",
+            name = st.text_input("Your name (optional)", placeholder="e.g. Asha",
                                  help="Only shown on your progress page and report. You can leave it empty.")
             language = st.selectbox("Language you learn best in", LANGUAGES)
             upload_label = "Upload my own lesson (.txt, .md, .pdf)"
