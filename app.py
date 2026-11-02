@@ -57,7 +57,7 @@ def show_progress(lesson_id: int):
         "Quiz B": fmt(r["quiz_b"]), "Mastery": fmt(r["mastery"]),
         "Status": "✅ mastered" if r["mastered"] else ("—" if r["mastery"] is None else "📈 learning"),
     } for r in p["concepts"]])
-    st.dataframe(df, hide_index=True, use_container_width=True)
+    st.dataframe(df, hide_index=True, width="stretch")
     if p["quiz_b"] is not None:
         chart = pd.DataFrame({
             "Quiz A": [r["quiz_a"] or 0 for r in p["concepts"]],
@@ -88,12 +88,14 @@ if state.stage == "setup":
             except ValueError as e:
                 st.error(str(e))
     if st.button("Start diagnostic quiz", type="primary", disabled=not lesson_text):
-        with st.spinner("Content Agent is reading the lesson and writing two matching quizzes…"):
+        with st.spinner("Content Agent is reading the lesson and writing your diagnostic quiz…"):
             try:
                 state.lesson_id = session.start_lesson(store, name, language, lesson_text)
             except Exception as e:  # surface model/credential errors in the UI during the demo
                 st.error(f"Could not prepare the lesson: {e}")
                 st.stop()
+        # Quiz B is written in the background while the student takes Quiz A.
+        state.quiz_b_future = session.start_quiz_b(store, state.lesson_id)
         go("quiz_a")
 
 lesson_id = state.get("lesson_id")
@@ -172,6 +174,17 @@ if state.stage == "learn":
 
 # 5. Follow-up
 if state.stage == "quiz_b":
+    if not analysis.quiz_b:
+        if "quiz_b_future" not in state:
+            state.quiz_b_future = session.start_quiz_b(store, lesson_id)
+        with st.spinner("Content Agent is finishing your follow-up quiz…"):
+            try:
+                analysis = session.finish_quiz_b(store, lesson_id, state.quiz_b_future)
+            except Exception as e:
+                del state["quiz_b_future"]
+                st.error(f"Could not write Quiz B: {e}")
+                st.button("Try again")
+                st.stop()
     st.header("Follow-up Quiz B")
     if state.get("decision") is None:
         st.success("The Assessment Agent found every concept mastered. Let's confirm with Quiz B.")

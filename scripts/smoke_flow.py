@@ -1,5 +1,5 @@
 """Runs the whole learning session with a SIMULATED student, no clicking needed:
-Content Agent -> Quiz A -> Assessment Agent -> Tutor Agent -> practice -> Quiz B.
+Content Agent -> Quiz A (Quiz B written in the background) -> Assessment Agent -> Tutor Agent -> practice -> Quiz B.
 
     python scripts/smoke_flow.py Hindi
 
@@ -29,7 +29,8 @@ def timed(label, fn, *args):
 language = sys.argv[1] if len(sys.argv) > 1 else "Hindi"
 store = Store(":memory:")
 
-lesson_id = timed("Content Agent: concepts + Quiz A/B", session.start_lesson, store, "Sim", language, sample_lesson())
+lesson_id = timed("Content Agent: concepts + Quiz A", session.start_lesson, store, "Sim", language, sample_lesson())
+quiz_b_future = session.start_quiz_b(store, lesson_id)  # runs during the tutoring rounds below
 _, analysis = store.get_lesson(lesson_id)
 for c in analysis.concepts:
     print(f"    {c.id} {c.name} ({c.english_term}) prerequisites={c.prerequisite_ids}")
@@ -55,6 +56,8 @@ for round_no in (1, 2):
                                       practice_answers, decision["decision_id"])
     print(f"    practice: {sum(results)}/{len(results)} correct")
 
+analysis = timed("Waiting for Quiz B (written in the background)", session.finish_quiz_b,
+                 store, lesson_id, quiz_b_future)
 session.submit_quiz(store, lesson_id, "quiz_b", {i: q.answer_index for i, q in enumerate(analysis.quiz_b)})
 report = session.progress(store, lesson_id)
 print("\nSIMULATED student, not real results:")

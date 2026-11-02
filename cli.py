@@ -56,8 +56,9 @@ def main():
     store = Store(db_path())
     text = text_from_path(args.lesson) if args.lesson else sample_lesson()
 
-    print("Content Agent is reading the lesson and writing two matching quizzes...")
+    print("Content Agent is reading the lesson and writing your diagnostic quiz...")
     lesson_id = session.start_lesson(store, args.name, args.language, text)
+    quiz_b_future = session.start_quiz_b(store, lesson_id)  # written while the student works
     _, analysis = store.get_lesson(lesson_id)
     print(f"\nTopic: {analysis.topic}")
     for c in analysis.concepts:
@@ -91,6 +92,8 @@ def main():
         if input("\nAnother tutoring round? (y/N): ").strip().lower() != "y":
             break
 
+    print("\nContent Agent is finishing your follow-up quiz...")
+    analysis = session.finish_quiz_b(store, lesson_id, quiz_b_future)
     print("\n##### Follow-up Quiz B #####")
     session.submit_quiz(store, lesson_id, "quiz_b", ask(analysis.quiz_b))
     print_progress(store, lesson_id)

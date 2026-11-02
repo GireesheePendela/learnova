@@ -34,6 +34,22 @@ class LessonAnalysis(BaseModel):
     )
 
 
+class DiagnosticDraft(BaseModel):
+    """First Content Agent call: concepts and the diagnostic quiz."""
+
+    topic: str
+    concepts: list[Concept]
+    quiz_a: list[QuizQuestion] = Field(description="Diagnostic quiz")
+
+
+class FollowUpQuiz(BaseModel):
+    """Second Content Agent call: the parallel follow-up quiz."""
+
+    quiz_b: list[QuizQuestion] = Field(
+        description="Same concepts and difficulties as quiz_a, in the same order, different questions"
+    )
+
+
 class GlossaryTerm(BaseModel):
     english: str
     translation: str

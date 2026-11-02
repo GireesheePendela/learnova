@@ -15,9 +15,10 @@ work out what to ask: the system keeps a concept-level mastery record and decide
 Lesson (sample, .txt/.md, or PDF) + student's language
         │
         ▼
-Content Agent ── extracts 3–5 concepts (with prerequisites)
-                 writes parallel Quiz A and Quiz B (same concept × difficulty blueprint)
-                 └─ deterministic check rejects non-comparable quizzes and asks the agent to fix them
+Content Agent ── extracts 3–5 concepts (with prerequisites) and writes Quiz A
+                 then, in the background while the student takes Quiz A, a parallel Quiz B
+                 (same concept × difficulty blueprint)
+                 └─ deterministic checks reject invalid or non-comparable quizzes and ask the agent to fix them
         │
         ▼
 Diagnostic Quiz A ── graded against structured answer keys (no LLM grading)
@@ -47,6 +48,8 @@ Design choices:
 - **Quizzes are comparable by construction.** Quiz B must match Quiz A's (concept, difficulty) blueprint, with no reused questions. This is checked in code.
 - **The session never stalls.** If the model skips the tool call, a deterministic version of the same policy picks the concept, and the UI shows which path made the decision.
 - **One setting switches the model provider** (`MODEL_PROVIDER=bedrock|ollama`). No agent code changes.
+- **Each agent can use its own model** (`CONTENT_MODEL_ID`, `ASSESSMENT_MODEL_ID`, `TUTOR_MODEL_ID`), e.g. a larger
+  model for the Content Agent, whose answer keys all grading depends on.
 
 ## Run it
 
@@ -58,8 +61,10 @@ cd learnova
 pip install -r requirements.txt
 cp .env.example .env        # set BEDROCK_MODEL_ID to a model the sandbox can use
 python -m unittest discover tests
-python scripts/check_model.py          # ~10s: confirms Bedrock access and the model id
+python scripts/list_models.py          # models this account offers (to pick a larger one)
+python scripts/check_model.py          # ~10s: confirms Bedrock access and each agent's model id
 python scripts/smoke_content.py Hindi  # Content Agent only: concepts + parallel quizzes
+python scripts/smoke_languages.py      # Content Agent in every supported language (a few minutes)
 python scripts/smoke_flow.py Hindi     # whole session with a simulated student
 streamlit run app.py --server.port 8501 --server.headless true
 ```

@@ -64,21 +64,38 @@ def weakest_concept(report: list[dict]) -> dict | None:
     return min(roots, key=lambda r: r["mastery"])
 
 
-def check_quizzes(analysis: LessonAnalysis) -> list[str]:
-    """Problems that make Quiz A and Quiz B not comparable. Empty list means OK."""
+def _check_questions(name: str, quiz, ids: set[str]) -> list[str]:
+    problems = []
+    for i, q in enumerate(quiz):
+        if q.concept_id not in ids:
+            problems.append(f"{name}[{i}] uses unknown concept_id '{q.concept_id}'.")
+        if len({o.strip().lower() for o in q.options}) != len(q.options):
+            problems.append(f"{name}[{i}] has duplicate options.")
+    return problems
+
+
+def check_diagnostic(analysis: LessonAnalysis) -> list[str]:
+    """Problems with the concepts or Quiz A alone. Empty list means OK."""
     problems = []
     ids = {c.id for c in analysis.concepts}
     if len(ids) != len(analysis.concepts):
         problems.append("Concept ids are not unique.")
-    if not analysis.quiz_a or not analysis.quiz_b:
-        problems.append("Both quiz_a and quiz_b must contain questions.")
+    if not analysis.quiz_a:
+        problems.append("quiz_a must contain questions.")
+    problems += _check_questions("quiz_a", analysis.quiz_a, ids)
+    missing = ids - {q.concept_id for q in analysis.quiz_a}
+    if missing:
+        problems.append(f"Concepts with no diagnostic question: {sorted(missing)}.")
+    return problems
 
-    for name, quiz in (("quiz_a", analysis.quiz_a), ("quiz_b", analysis.quiz_b)):
-        for i, q in enumerate(quiz):
-            if q.concept_id not in ids:
-                problems.append(f"{name}[{i}] uses unknown concept_id '{q.concept_id}'.")
-            if len({o.strip().lower() for o in q.options}) != len(q.options):
-                problems.append(f"{name}[{i}] has duplicate options.")
+
+def check_quizzes(analysis: LessonAnalysis) -> list[str]:
+    """Problems that make Quiz A and Quiz B not comparable. Empty list means OK."""
+    problems = check_diagnostic(analysis)
+    ids = {c.id for c in analysis.concepts}
+    if not analysis.quiz_b:
+        problems.append("quiz_b must contain questions.")
+    problems += _check_questions("quiz_b", analysis.quiz_b, ids)
 
     blueprint_a = Counter((q.concept_id, q.difficulty) for q in analysis.quiz_a)
     blueprint_b = Counter((q.concept_id, q.difficulty) for q in analysis.quiz_b)
@@ -87,10 +104,6 @@ def check_quizzes(analysis: LessonAnalysis) -> list[str]:
             "quiz_a and quiz_b must cover the same (concept_id, difficulty) pairs the same number of times. "
             f"quiz_a: {dict(blueprint_a)}; quiz_b: {dict(blueprint_b)}."
         )
-
-    missing = ids - {q.concept_id for q in analysis.quiz_a}
-    if missing:
-        problems.append(f"Concepts with no diagnostic question: {sorted(missing)}.")
 
     reused = {q.question.strip().lower() for q in analysis.quiz_a} & {q.question.strip().lower() for q in analysis.quiz_b}
     if reused:

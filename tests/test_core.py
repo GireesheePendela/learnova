@@ -3,9 +3,10 @@ Run with:  python -m unittest discover tests
 """
 
 import unittest
+from unittest import mock
 
 from learnova import session
-from learnova.grading import check_quizzes, mastery_report, weakest_concept
+from learnova.grading import check_diagnostic, check_quizzes, mastery_report, weakest_concept
 from learnova.schemas import Concept, LessonAnalysis, PracticeQuestion, QuizQuestion, TutoringPlan
 from learnova.store import Store
 
@@ -47,6 +48,16 @@ class CheckQuizzesTest(unittest.TestCase):
         a.quiz_a[0] = q("c9", 1, "a1")
         self.assertTrue(any("unknown concept_id" in p for p in check_quizzes(a)))
 
+    def test_diagnostic_checked_without_quiz_b(self):
+        a = analysis().model_copy(update={"quiz_b": []})
+        self.assertEqual(check_diagnostic(a), [])
+        self.assertTrue(any("quiz_b must contain" in p for p in check_quizzes(a)))
+
+    def test_concept_without_diagnostic_question_fails(self):
+        a = analysis()
+        a.quiz_a = a.quiz_a[:2]
+        self.assertTrue(any("no diagnostic question" in p for p in check_diagnostic(a)))
+
 
 class SessionTest(unittest.TestCase):
     def setUp(self):
@@ -74,6 +85,16 @@ class SessionTest(unittest.TestCase):
         session.submit_quiz(self.store, self.lesson_id, "quiz_a", {0: 0, 1: 0, 2: 0, 3: 0})
         _, a = self.store.get_lesson(self.lesson_id)
         self.assertIsNone(weakest_concept(mastery_report(a, self.store.attempts(self.lesson_id))))
+
+    def test_quiz_b_written_in_background_is_saved(self):
+        full = analysis()
+        lesson_id = self.store.create_lesson("Asha", "Hindi", "lesson text", full.model_copy(update={"quiz_b": []}))
+        with mock.patch("learnova.agents.content.write_follow_up", return_value=full) as write:
+            future = session.start_quiz_b(self.store, lesson_id)
+            session.finish_quiz_b(self.store, lesson_id, future)
+        self.assertEqual(write.call_args.args[1:], ("lesson text", "Hindi"))
+        _, saved = self.store.get_lesson(lesson_id)
+        self.assertEqual([x.question for x in saved.quiz_b], ["b1", "b2", "b3", "b4"])
 
     def test_practice_moves_mastery_and_plan_round_trips(self):
         session.submit_quiz(self.store, self.lesson_id, "quiz_a", {0: 0, 1: 0, 2: 1, 3: 1})

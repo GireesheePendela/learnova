@@ -8,10 +8,11 @@ from ..config import get_model, provider
 T = TypeVar("T", bound=BaseModel)
 
 
-def make_agent(system_prompt: str, tools: list | None = None, output_model: type[BaseModel] | None = None) -> Agent:
+def make_agent(system_prompt: str, tools: list | None = None, output_model: type[BaseModel] | None = None,
+               role: str | None = None) -> Agent:
     schema = output_model.model_json_schema() if output_model else None
     # callback_handler=None stops Strands from streaming tokens to stdout.
-    return Agent(model=get_model(schema), system_prompt=system_prompt, tools=tools or [], callback_handler=None)
+    return Agent(model=get_model(schema, role), system_prompt=system_prompt, tools=tools or [], callback_handler=None)
 
 
 def structured(agent: Agent, output_model: type[T], prompt: str) -> T:

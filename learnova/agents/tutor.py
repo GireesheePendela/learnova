@@ -12,10 +12,14 @@ exams use. List those terms in the glossary.
 
 Teaching rules:
 - Start from the specific mistakes the student made and name the misconception kindly.
-- Use short sentences, everyday examples from the student's likely context, and one worked example.
+- Keep the explanation short: at most about 150 words, plain text with simple Markdown, no emoji
+  and no horizontal rules. Do not open with a greeting.
+- Use short sentences, everyday examples from the student's likely context, and one short worked example.
 - Write 3 practice questions at the requested difficulty, aimed at those mistakes. Each has
   exactly 4 options, one correct answer_index (solve it yourself first), a hint that nudges
   without giving the answer away, and a step-by-step solution.
+- Write in the student's language and its usual script (Devanagari for Hindi, Bengali script for
+  Bengali, Arabic script for Arabic, simplified characters for Chinese).
 - If the student's language is English, still keep the glossary of key terms.
 """
 
@@ -34,6 +38,6 @@ def build_plan(concept: Concept, lesson_excerpt: str, language: str, difficulty:
         f"Student's mistakes:\n{mistake_lines}\n\n"
         f"Lesson for reference:\n<lesson>\n{lesson_excerpt}\n</lesson>"
     )
-    plan = structured(make_agent(SYSTEM_PROMPT, output_model=TutoringPlan), TutoringPlan, prompt)
+    plan = structured(make_agent(SYSTEM_PROMPT, output_model=TutoringPlan, role="tutor"), TutoringPlan, prompt)
     plan.concept_id = concept.id
     return plan

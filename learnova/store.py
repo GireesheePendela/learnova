@@ -65,6 +65,11 @@ class Store:
             raise KeyError(f"No lesson {lesson_id}")
         return row, LessonAnalysis.model_validate_json(row["analysis_json"])
 
+    def update_analysis(self, lesson_id: int, analysis: LessonAnalysis) -> None:
+        self.conn.execute("UPDATE lessons SET analysis_json = ? WHERE id = ?",
+                          (analysis.model_dump_json(), lesson_id))
+        self.conn.commit()
+
     # Attempts
     def record_attempt(self, lesson_id: int, phase: str, concept_id: str, question: str,
                        chosen: str | None, correct: bool, round_no: int = 0) -> None:

@@ -1,5 +1,5 @@
 strands-agents>=1.0
-streamlit>=1.40
+streamlit>=1.50
 pandas
 pydantic>=2
 pypdf

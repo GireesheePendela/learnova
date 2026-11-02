@@ -18,9 +18,21 @@ def provider() -> str:
     return os.getenv("MODEL_PROVIDER", "bedrock").lower()
 
 
-def get_model(output_schema: dict | None = None):
+AGENT_ROLES = ("content", "assessment", "tutor")
+
+
+def bedrock_model_id(role: str | None = None) -> str | None:
+    """CONTENT_MODEL_ID / ASSESSMENT_MODEL_ID / TUTOR_MODEL_ID override BEDROCK_MODEL_ID for one
+    agent, so e.g. the Content Agent can use a larger model than the others."""
+    if role and os.getenv(f"{role.upper()}_MODEL_ID"):
+        return os.environ[f"{role.upper()}_MODEL_ID"]
+    return os.getenv("BEDROCK_MODEL_ID")
+
+
+def get_model(output_schema: dict | None = None, role: str | None = None):
     """output_schema: JSON schema the reply must follow. Bedrock models handle Strands'
-    structured-output tool well, so it is only used to constrain Ollama models."""
+    structured-output tool well, so it is only used to constrain Ollama models.
+    role: 'content', 'assessment' or 'tutor', for a per-agent model id."""
     name = provider()
 
     if name == "bedrock":
@@ -29,8 +41,8 @@ def get_model(output_schema: dict | None = None):
         kwargs = {"temperature": float(os.getenv("TEMPERATURE", "0.3"))}
         # Leave model_id unset to use the Strands default; set it to whatever
         # model the sandbox account has access to.
-        if os.getenv("BEDROCK_MODEL_ID"):
-            kwargs["model_id"] = os.environ["BEDROCK_MODEL_ID"]
+        if bedrock_model_id(role):
+            kwargs["model_id"] = bedrock_model_id(role)
         if os.getenv("AWS_REGION"):
             kwargs["region_name"] = os.environ["AWS_REGION"]
         # Strands fills max_tokens for models it knows; for others Bedrock's per-model default

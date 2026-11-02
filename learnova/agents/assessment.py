@@ -24,10 +24,11 @@ Always:
      with a LOWER difficulty and a different focus (another explanation or example).
    - If practice on the last concept reached 0.8, move on.
 4. Call assign_tutoring exactly once with a focus that names the specific misconception you saw
-   in the mistakes, and a one-sentence reason a student can read.
+   in the mistakes, and a one-sentence reason a student can read. Write the reason in the
+   student's language and its usual script, keeping English academic terms in parentheses.
 
 If every assessed concept is mastered, do not call assign_tutoring; reply ALL_MASTERED.
-After acting, reply with one short sentence explaining your decision.
+After acting, reply with one short sentence in English explaining your decision (for the teacher).
 """
 
 
@@ -85,8 +86,9 @@ def recommend_next(store: Store, lesson_id: int) -> dict | None:
         assigned.update(_assign(store, lesson_id, row, analysis, concept_id, difficulty, focus, reason))
         return f"Tutor Agent prepared practice for {concept_id}."
 
-    agent = make_agent(SYSTEM_PROMPT, tools=[get_mastery_report, get_mistakes, get_tutoring_history, assign_tutoring])
-    result = agent("Decide what this student should study next.")
+    agent = make_agent(SYSTEM_PROMPT, tools=[get_mastery_report, get_mistakes, get_tutoring_history, assign_tutoring],
+                       role="assessment")
+    result = agent(f"Student's language: {row['language']}\nDecide what this student should study next.")
     if assigned:
         assigned["source"] = "assessment_agent"
         assigned["agent_note"] = str(result).strip()
