@@ -17,6 +17,12 @@ the student or teacher uploads, not only the built-in math and science samples.
 AWS services: **Amazon Bedrock** (the three agents' models) and **Amazon Polly** (read-aloud).
 Students never need an account or pay anything; whoever hosts the app pays for its AWS usage.
 
+## 🎥 Watch Learnova in Action
+
+[![Learnova demo video](https://img.youtube.com/vi/BuFJpT1x3Oc/hqdefault.jpg)](https://youtu.be/BuFJpT1x3Oc)
+
+Learnova running on Amazon Bedrock: [watch the demo on YouTube](https://youtu.be/BuFJpT1x3Oc).
+
 ## Screenshots
 
 | Start | Learn (Hindi) |
